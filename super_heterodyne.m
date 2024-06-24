@@ -15,7 +15,7 @@ modulated_signal=cell(1,numel(ds.Files));
 sampling_freq = cell(1,numel(ds.Files));
 new_samples = cell(1,numel(ds.Files));
 % now reading the files 
-for i = 1:numel(ds.Files)
+for i = 1:6
     [audiodata{i},sampling_freq{i}] = read(ds);
 end
 
@@ -61,8 +61,8 @@ fs = sampling_freq{i}.SampleRate;
 figure
 for i= 1:numel(ds.Files)
     N=length(paded_audio_data{i});
-    k=-N/2:(N/2)-1;
-    number = k*fs/N ;
+    k=-N/2:(N/2)-1;  
+    number = k*fs/N;
     signal_fft = fftshift(fft(paded_audio_data{i}));
     signal_AK = (1/N)* abs(signal_fft);
     subplot(3,2,i);
@@ -79,6 +79,7 @@ end
 % we need to make sure that the carrier frequncey whatever its values it
 % should be less than the new sampling frequncey so that is why we made the
 % sampling freq is 20 times the original sampling freq
+%% AM modulator
 figure;
 for i= 1:6
     N = 740544*20;   % the number of samples increased as the the carrier frequncey increased
@@ -86,7 +87,9 @@ for i= 1:6
     carrier_freq = 100000;
     delta_freq = 50000;
     fc = (i-1)* delta_freq + carrier_freq;   % making the formula of the carrier frequncey
-    new_sample = interp(paded_audio_data{i},20);   % making the sampling frequncey up to 20 times the original 
+    new_sample = interp(paded_audio_data{i},20);
+     %disp(length(new_sample));
+    % making the sampling frequncey up to 20 times the original 
     t = (0:length(new_sample)-1)./(44100*20);  % adjusting the time to the new sampling frequncey
     carrier = cos(2*pi*t*fc)/1;   % generating the carrier siganl 
     modulated_signal{i} = carrier'.*new_sample;  % assigning the modulated signal  
@@ -196,7 +199,8 @@ while true
     % and we want to make an oscillator to demodulate the signal 
     
     fc_demodulate = fc_filter + 25000;
-    offset = 30000 ;   % we are adding the offset as the project pdf stated
+    offset = 25000;   
+      % we are adding the offset as the project pdf stated
     t = (0:length(signal)-1)./(44100*20);  % adjusting the time to the new sampling frequncey
     carrier = cos(2*pi*t*fc_demodulate);   % generating the carrier siganl
     signal_IF = carrier' .* signal_RF;
@@ -268,7 +272,6 @@ while true
     %% now the final part we return the signal to its original sampling frequncey and we sound it to see how it performed
     final_signal = 10*resample(final_signal,1,20);
     sound(final_signal,44100);
-    
     
     
 end
